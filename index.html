@@ -149,6 +149,10 @@
   .info b{display:block;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);font-weight:600;margin-bottom:4px}
   .tbd{border-bottom:1px dashed var(--gold-2)}
 
+  .social{display:flex;gap:14px;margin-top:26px}
+  .social a{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:50%;color:var(--ink);background:rgba(255,255,255,.6);transition:color .3s,border-color .3s,transform .3s}
+  .social a:hover{color:var(--gold);border-color:var(--gold-2);transform:translateY(-2px)}
+  .social svg{width:20px;height:20px}
   footer{position:relative;z-index:2;border-top:1px solid var(--line);background:var(--bg);padding:22px clamp(20px,6vw,96px)}
   footer .wrap{justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
   footer p{font-size:13px}
@@ -158,6 +162,10 @@
   .seals .credit::before{display:none}
   .credit a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line)}
   .credit a:hover{color:var(--gold)}
+  .seals .dev{display:inline-flex;align-items:center;gap:7px;font-size:10px;letter-spacing:.04em;text-transform:none;color:var(--soft);text-decoration:none;transition:color .3s}
+  .seals .dev img{height:20px;width:auto;opacity:.7;transition:opacity .3s}
+  .seals .dev:hover{color:var(--gold)}
+  .seals .dev:hover img{opacity:.9}
   .seals span::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--gold)}
 
   /* Reveal */
@@ -289,6 +297,7 @@
         <p class="reveal d1" style="margin-bottom:30px">O conhecimento védico é transmitido de mestre a discípulo. Nosso estudo se apoia nessa sucessão.</p>
         <ol class="lineage">
           <li class="reveal d1"><div class="when">Século XVI · Bengala</div><h3>Śrī Caitanya Mahāprabhu</h3><p>Inaugura o movimento de canto congregacional dos santos nomes.</p></li>
+          <li class="reveal d1"><div class="when">Século XIX · Bengala</div><h3>Śrīla Bhaktivinoda Ṭhākura</h3><p>Revive o movimento de Śrī Caitanya e, em 1896, envia ao Ocidente seu livro sobre a vida e os ensinamentos de Caitanya, que chega à Universidade McGill, no Canadá. Abre o caminho que Śrīla Prabhupāda levaria adiante.</p></li>
           <li class="reveal d2"><div class="when">1966 · Nova York</div><h3>Śrīla Prabhupāda</h3><p>A.C. Bhaktivedanta Swami, fundador-ācārya da ISKCON, leva a tradição ao Ocidente.</p></li>
           <li class="reveal d3"><div class="when">2013 · Krishna West</div><h3>H.D. Goswami Ācāryadeva</h3><p>Discípulo de Prabhupāda e PhD em sânscrito por Harvard. Funda o Krishna West para apresentar o bhakti à cultura ocidental.</p></li>
         </ol>
@@ -339,6 +348,14 @@
           <div><b>Endereço</b><span class="tbd">A confirmar</span></div>
           <div><b>E-mail</b><span class="tbd">contato@seudominio</span></div>
         </div>
+        <div class="social reveal d3">
+          <a href="https://www.instagram.com/centro_de_estudos_vaishnavas/" target="_blank" rel="noopener" aria-label="Instagram do Centro de Estudos Vaishnavas" title="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://www.youtube.com/@CentrodeEstudosVaishnavas" target="_blank" rel="noopener" aria-label="YouTube do Centro de Estudos Vaishnavas" title="YouTube">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10.2 9.3v5.4l4.6-2.7z" fill="currentColor" stroke="none"/></svg>
+          </a>
+        </div>
       </div>
     </div>
   </section>
@@ -347,7 +364,7 @@
 <footer>
   <div class="wrap">
     <p>© <span id="yr"></span> Centro de Estudos Vaishnavas</p>
-    <div class="seals"><span>ISKCON</span><span>Krishna West</span><span class="credit">Modelo 3D: <a href="https://sketchfab.com/rajeevkhare1234567890" target="_blank" rel="noopener">rajeevkhare</a></span></div>
+    <div class="seals"><span>ISKCON</span><span>Krishna West</span><span class="credit">Modelo 3D: <a href="https://sketchfab.com/rajeevkhare1234567890" target="_blank" rel="noopener">rajeevkhare</a></span><a class="dev" href="https://parampara.atmai.me" target="_blank" rel="noopener"><img src="ppr-logo.webp" alt="" width="29" height="20">Desenvolvido por Parampara</a></div>
   </div>
 </footer>
 
