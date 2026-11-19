@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CEV · Rādhā-Krishna (frente e costas)</title>
+<meta name="description" content="Centro de Estudos Vaishnavas — bhakti-yoga, filosofia e comunidade, alinhado à ISKCON e ao Krishna West.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFAF7; --paper:#FFFFFF; --ink:#1E2126; --muted:#6A6E75; --soft:#9A9DA3;
+    --gold:#A9834B; --gold-2:#C9A86A; --line:#E8E3D9;
+    --serif:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+    --sans:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:400;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  ::selection{background:#EADFC9}
+
+  /* Stage */
+  #stage{position:fixed;inset:0;z-index:0;pointer-events:none}
+  #stage canvas{display:block;width:100%;height:100%}
+  #fallback{position:fixed;left:50%;top:52%;transform:translate(-50%,-50%);height:78vh;display:none;z-index:0;pointer-events:none}
+  .vignette{position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(ellipse at 50% 40%, rgba(255,255,255,0) 40%, rgba(244,240,232,.55) 100%)}
+
+  /* Header */
+  header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+    padding:22px clamp(20px,4vw,56px);transition:background .4s, box-shadow .4s, padding .4s}
+  header.scrolled{background:rgba(251,250,247,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 1px 0 var(--line);padding-top:14px;padding-bottom:14px}
+  .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink)}
+  .brand-logo{width:46px;height:46px;flex:none;display:block;filter:drop-shadow(0 1px 2px rgba(60,45,20,.18));transition:width .4s,height .4s}
+  header.scrolled .brand-logo{width:38px;height:38px}
+  .brand-name{font-family:var(--serif);font-size:19px;font-weight:500;letter-spacing:.01em;line-height:1.1}
+  .brand-name small{display:block;font-family:var(--sans);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-top:3px}
+  nav ul{list-style:none;display:flex;gap:clamp(16px,2.4vw,34px)}
+  nav a{color:var(--ink);text-decoration:none;font-size:13px;letter-spacing:.04em;position:relative;padding:4px 0;opacity:.78;transition:opacity .25s}
+  nav a:hover,nav a.active{opacity:1}
+  nav a::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:1px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .35s}
+  nav a.active::after,nav a:hover::after{transform:scaleX(1)}
+  .menu-btn{display:none;background:none;border:0;width:40px;height:40px;cursor:pointer;position:relative}
+  .menu-btn span{position:absolute;left:9px;right:9px;height:1px;background:var(--ink);transition:transform .3s, top .3s}
+  .menu-btn span:nth-child(1){top:16px}.menu-btn span:nth-child(2){top:23px}
+  body.menu-open .menu-btn span:nth-child(1){top:20px;transform:rotate(45deg)}
+  body.menu-open .menu-btn span:nth-child(2){top:20px;transform:rotate(-45deg)}
+
+  /* Sections */
+  main{position:relative;z-index:2}
+  section{position:relative;min-height:100vh;display:flex;align-items:center;padding:120px clamp(20px,6vw,96px)}
+  .wrap{width:100%;max-width:1240px;margin:0 auto;display:flex}
+  .right .wrap{justify-content:flex-end}
+  .center .wrap{justify-content:center;text-align:center}
+  .col{max-width:470px}
+  .eyebrow{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);font-weight:600;display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .eyebrow::before{content:"";width:28px;height:1px;background:var(--gold)}
+  .center .eyebrow{justify-content:center}
+  h1,h2,h3{font-family:var(--serif);font-weight:500;letter-spacing:-.005em;line-height:1.04}
+  h1{font-size:clamp(46px,6.4vw,92px)}
+  h2{font-size:clamp(36px,4.4vw,60px);margin-bottom:22px}
+  h3{font-size:25px;line-height:1.15}
+  h1 em,h2 em{font-style:italic;color:var(--gold)}
+  p{color:var(--muted);font-size:16px}
+  .lead{font-size:18px;color:#4C5057;max-width:520px}
+  .rule{width:100%;height:1px;background:var(--line);margin:30px 0}
+
+  /* Hero */
+  #inicio{align-items:flex-end;padding-bottom:9vh}
+  #inicio .wrap{justify-content:space-between;align-items:flex-end;gap:40px}
+  .hero-title{max-width:520px}
+  .hero-title h1{margin-bottom:22px}
+  .hero-side{max-width:300px;text-align:right}
+  .hero-side p{font-size:15px;margin-bottom:22px}
+  .btns{display:flex;gap:12px;flex-wrap:wrap}
+  .hero-side .btns{justify-content:flex-end}
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;font-weight:500;border:1px solid var(--ink);color:var(--ink);background:transparent;cursor:pointer;transition:background .3s,color .3s,border-color .3s;font-family:var(--sans)}
+  .btn:hover{background:var(--ink);color:#fff}
+  .btn.solid{background:var(--ink);color:#fff}
+  .btn.solid:hover{background:var(--gold);border-color:var(--gold)}
+  .scroll-cue{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--soft);display:flex;flex-direction:column;align-items:center;gap:10px}
+  .scroll-cue i{width:1px;height:38px;background:linear-gradient(var(--gold),transparent);animation:cue 2.4s ease-in-out infinite;transform-origin:top}
+  @keyframes cue{0%{transform:scaleY(0)}50%{transform:scaleY(1)}100%{transform:scaleY(0);transform-origin:bottom}}
+
+  /* Lists */
+  .studies{list-style:none;border-top:1px solid var(--line)}
+  .studies li{display:grid;grid-template-columns:44px 1fr;gap:6px 14px;padding:20px 0;border-bottom:1px solid var(--line)}
+  .studies .n{font-family:var(--serif);font-style:italic;color:var(--gold);font-size:20px;line-height:1.2}
+  .studies h3{font-size:23px;margin-bottom:4px}
+  .studies p{font-size:14.5px}
+
+  .lineage{list-style:none;position:relative;margin-top:8px}
+  .lineage::before{content:"";position:absolute;left:7px;top:10px;bottom:10px;width:1px;background:linear-gradient(var(--gold-2),var(--line))}
+  .lineage li{position:relative;padding:0 0 30px 40px}
+  .lineage li::before{content:"";position:absolute;left:0;top:8px;width:15px;height:15px;border-radius:50%;background:var(--bg);border:1px solid var(--gold)}
+  .lineage li:last-child::before{background:var(--gold)}
+  .lineage .when{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);font-weight:500}
+  .lineage h3{margin:4px 0 6px}
+  .lineage p{font-size:14.5px}
+
+  /* Verse */
+  #verso .col{max-width:600px}
+  blockquote{font-family:var(--serif);font-style:italic;font-size:clamp(30px,3.6vw,50px);line-height:1.22;color:var(--ink);font-weight:400}
+  .cite{margin-top:26px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+  .cite span{color:var(--gold)}
+  #verso{background:linear-gradient(transparent, rgba(251,250,247,.0))}
+
+  /* Meetings */
+  .meet{list-style:none;border-top:1px solid var(--line)}
+  .meet li{display:flex;justify-content:space-between;gap:20px;align-items:baseline;padding:22px 0;border-bottom:1px solid var(--line)}
+  .meet h3{font-size:24px;margin-bottom:4px}
+  .meet p{font-size:14.5px}
+  .meet .t{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);white-space:nowrap;font-weight:500}
+
+  /* Contact */
+  form{display:grid;gap:14px;margin-top:8px}
+  label{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:500;display:grid;gap:6px}
+  input,textarea{font:inherit;font-size:15px;color:var(--ink);background:rgba(255,255,255,.75);border:0;border-bottom:1px solid #CFC9BD;padding:10px 2px;outline:none;transition:border-color .3s;text-transform:none;letter-spacing:0}
+  input:focus,textarea:focus{border-color:var(--gold)}
+  textarea{resize:vertical;min-height:84px}
+  .form-note{font-size:13px;color:var(--gold);min-height:20px}
+  .info{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px}
+  .info div{font-size:14px;color:var(--muted)}
+  .info b{display:block;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);font-weight:600;margin-bottom:4px}
+  .tbd{border-bottom:1px dashed var(--gold-2)}
+
+  footer{position:relative;z-index:2;border-top:1px solid var(--line);background:var(--bg);padding:44px clamp(20px,6vw,96px)}
+  footer .wrap{justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+  footer p{font-size:13px}
+  .seals{display:flex;gap:22px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .seals span{display:flex;align-items:center;gap:8px}
+  .seals span::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--gold)}
+
+  /* Reveal */
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity 1.1s cubic-bezier(.2,.7,.2,1),transform 1.1s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  .reveal.d1{transition-delay:.12s}.reveal.d2{transition-delay:.24s}.reveal.d3{transition-delay:.36s}
+
+  /* Intro curtain */
+  #curtain{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;align-items:center;justify-content:center;transition:opacity 1.2s ease .2s, visibility 0s linear 1.4s}
+  #curtain.gone{opacity:0;visibility:hidden}
+  #curtain svg{width:64px;height:64px;animation:spin 6s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Mobile */
+  @media (max-width:860px){
+    nav{position:fixed;inset:0;background:rgba(251,250,247,.97);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .35s, visibility 0s linear .35s;z-index:-1}
+    body.menu-open nav{opacity:1;visibility:visible;transition:opacity .35s}
+    nav ul{flex-direction:column;align-items:center;gap:26px}
+    nav a{font-family:var(--serif);font-size:30px;opacity:1}
+    .menu-btn{display:block}
+    section{padding:72vh 18px 60px;align-items:flex-end}
+    #inicio{min-height:100svh;padding:0 22px 34px}
+    .brand-name small{display:none}
+    .brand-name{font-size:17px}
+    .wrap,.right .wrap{justify-content:center}
+    .col{max-width:560px;width:100%;background:rgba(251,250,247,.52);backdrop-filter:blur(3px) saturate(1.1);-webkit-backdrop-filter:blur(3px) saturate(1.1);padding:28px 24px;border:1px solid rgba(232,227,217,.7)}
+    .col p,.col li p{color:#4A4E55}
+    .col h2,.col h3,.col blockquote{text-shadow:0 0 18px rgba(251,250,247,.9)}
+    #inicio .wrap{flex-direction:column;align-items:stretch;gap:20px}
+    #inicio .col,#verso .col{background:none;border:0;backdrop-filter:none;-webkit-backdrop-filter:none;padding:0}
+    .hero-title,.hero-side{max-width:none;text-align:left}
+    #inicio h1{font-size:40px;margin-bottom:0}
+    #inicio .eyebrow{margin-bottom:12px}
+    .hero-side p{font-size:14px;margin-bottom:16px}
+    #inicio::before{content:"";position:absolute;left:0;right:0;bottom:0;height:52%;background:linear-gradient(rgba(251,250,247,0),rgba(251,250,247,.92) 38%);z-index:-1}
+    .hero-side .btns{justify-content:flex-start}
+    .scroll-cue{display:none}
+    #verso .col{background:rgba(251,250,247,.52);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);padding:26px 20px;border:1px solid rgba(232,227,217,.7)}
+    .info{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .reveal{transition:none;opacity:1;transform:none}
+    .scroll-cue i,#curtain svg{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<div id="curtain" aria-hidden="true">
+  <svg viewBox="0 0 64 64" fill="none" stroke="#A9834B" stroke-width="1"><circle cx="32" cy="32" r="30"/><circle cx="32" cy="32" r="22" stroke-dasharray="2 4"/></svg>
+</div>
+
+<div id="stage" aria-hidden="true"></div>
+<img id="fallback" src="s_front.webp" alt="">
+<div class="vignette" aria-hidden="true"></div>
+
+<header id="top">
+  <a class="brand" href="#inicio" aria-label="Centro de Estudos Vaishnavas — início">
+    <img class="brand-logo" src="kw-logo.webp" alt="Krishna West" width="46" height="46">
+    <span class="brand-name">Centro de Estudos Vaishnavas<small>Bhakti-yoga · Filosofia · Comunidade</small></span>
+  </a>
+  <nav aria-label="Principal">
+    <ul>
+      <li><a href="#centro">O Centro</a></li>
+      <li><a href="#estudos">Estudos</a></li>
+      <li><a href="#linhagem">Linhagem</a></li>
+      <li><a href="#encontros">Encontros</a></li>
+      <li><a href="#contato">Contato</a></li>
+    </ul>
+  </nav>
+  <button class="menu-btn" aria-label="Abrir menu"><span></span><span></span></button>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section id="inicio" data-pose="hero">
+    <div class="wrap">
+      <div class="hero-title">
+        <div class="eyebrow reveal">Desde a tradição, para hoje</div>
+        <h1 class="reveal d1">Sabedoria<br>antiga, <em>mente</em><br>contemporânea.</h1>
+      </div>
+      <div class="hero-side">
+        <p class="reveal d2">Um centro de estudo e prática do bhakti-yoga, a yoga da devoção, apresentado com profundidade filosófica e na linguagem de quem vive aqui.</p>
+        <div class="btns reveal d3">
+          <a class="btn solid" href="#centro">Conheça o Centro</a>
+          <a class="btn" href="#encontros">Encontros</a>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-cue">Role<i></i></div>
+  </section>
+
+  <!-- O CENTRO -->
+  <section id="centro" data-pose="left">
+    <div class="wrap">
+      <div class="col">
+        <div class="eyebrow reveal">O Centro</div>
+        <h2 class="reveal d1">Essência, <em>não</em> exotismo.</h2>
+        <p class="lead reveal d2">O Centro de Estudos Vaishnavas segue o espírito do Krishna West: preservar integralmente os princípios essenciais do bhakti e apresentá-los em formas culturais ocidentais.</p>
+        <div class="rule reveal d2"></div>
+        <p class="reveal d3">Somos alinhados à missão da ISKCON, fundada por Śrīla Prabhupāda, e estudamos sob a orientação de Hṛdayānanda Dāsa Goswami Ācāryadeva. O que buscamos é simples de dizer e profundo de viver: conhecer a Verdade Absoluta como pessoa, e servi-la com amor.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ESTUDOS -->
+  <section id="estudos" class="right" data-pose="right">
+    <div class="wrap">
+      <div class="col">
+        <div class="eyebrow reveal">Estudos</div>
+        <h2 class="reveal d1">O que <em>estudamos</em></h2>
+        <ul class="studies">
+          <li class="reveal d1"><span class="n">i.</span><div><h3>Bhagavad-gītā</h3><p>Leitura sistemática do diálogo entre Krishna e Arjuna: dever, consciência e liberdade.</p></div></li>
+          <li class="reveal d2"><span class="n">ii.</span><div><h3>Śrīmad-Bhāgavatam</h3><p>A narrativa e a teologia do Bhāgavata, com rigor textual e aplicação à vida.</p></div></li>
+          <li class="reveal d2"><span class="n">iii.</span><div><h3>Filosofia em diálogo</h3><p>Vedānta em conversa com o pensamento ocidental, de Heráclito à ciência da mente.</p></div></li>
+          <li class="reveal d3"><span class="n">iv.</span><div><h3>Prática</h3><p>Meditação com mantras, kīrtana e culinária vegetariana em comunidade.</p></div></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- LINHAGEM -->
+  <section id="linhagem" data-pose="close">
+    <div class="wrap">
+      <div class="col">
+        <div class="eyebrow reveal">Paramparā</div>
+        <h2 class="reveal d1">Uma <em>linhagem</em> viva</h2>
+        <p class="reveal d1" style="margin-bottom:30px">O conhecimento védico é transmitido de mestre a discípulo. Nosso estudo se apoia nessa sucessão.</p>
+        <ol class="lineage">
+          <li class="reveal d1"><div class="when">Século XVI · Bengala</div><h3>Śrī Caitanya Mahāprabhu</h3><p>Inaugura o movimento de canto congregacional dos santos nomes.</p></li>
+          <li class="reveal d2"><div class="when">1966 · Nova York</div><h3>Śrīla Prabhupāda</h3><p>A.C. Bhaktivedanta Swami, fundador-ācārya da ISKCON, leva a tradição ao Ocidente.</p></li>
+          <li class="reveal d3"><div class="when">2013 · Krishna West</div><h3>H.D. Goswami Ācāryadeva</h3><p>Discípulo de Prabhupāda e PhD em sânscrito por Harvard. Funda o Krishna West para apresentar o bhakti à cultura ocidental.</p></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- VERSO -->
+  <section id="verso" data-pose="verse">
+    <div class="wrap">
+      <div class="col">
+        <div class="eyebrow reveal">Um verso para começar</div>
+        <blockquote class="reveal d1">A alma não nasce e não morre. Não começou a existir e não deixará de existir. Quando o corpo perece, ela permanece.</blockquote>
+        <div class="cite reveal d2">Bhagavad-gītā <span>2.20</span> · paráfrase</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENCONTROS -->
+  <section id="encontros" class="right" data-pose="right2">
+    <div class="wrap">
+      <div class="col">
+        <div class="eyebrow reveal">Encontros</div>
+        <h2 class="reveal d1">Venha <em>conhecer</em></h2>
+        <ul class="meet">
+          <li class="reveal d1"><div><h3>Roda de estudo</h3><p>Leitura comentada da Bhagavad-gītā, aberta a iniciantes.</p></div><span class="t tbd">Dia a definir</span></li>
+          <li class="reveal d2"><div><h3>Kīrtana &amp; meditação</h3><p>Música devocional e meditação com mantras.</p></div><span class="t tbd">Dia a definir</span></li>
+          <li class="reveal d3"><div><h3>Jantar vegetariano</h3><p>Comida oferecida, conversa e comunidade.</p></div><span class="t tbd">Dia a definir</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTATO -->
+  <section id="contato" data-pose="end">
+    <div class="wrap">
+      <div class="col">
+        <div class="eyebrow reveal">Contato</div>
+        <h2 class="reveal d1">Fale <em>conosco</em></h2>
+        <form class="reveal d2" id="form" novalidate>
+          <label>Nome<input name="nome" autocomplete="name" required></label>
+          <label>E-mail<input name="email" type="email" autocomplete="email" required></label>
+          <label>Mensagem<textarea name="msg" required></textarea></label>
+          <div class="btns"><button class="btn solid" type="submit">Enviar mensagem</button></div>
+          <div class="form-note" role="status"></div>
+        </form>
+        <div class="info reveal d3">
+          <div><b>Endereço</b><span class="tbd">A confirmar</span></div>
+          <div><b>E-mail</b><span class="tbd">contato@seudominio</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>© <span id="yr"></span> Centro de Estudos Vaishnavas</p>
+    <div class="seals"><span>ISKCON</span><span>Krishna West</span></div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- UI ---------- */
+  var header = document.querySelector('header');
+  var btn = document.querySelector('.menu-btn');
+  btn.addEventListener('click', function(){ document.body.classList.toggle('menu-open'); });
+  document.querySelectorAll('nav a').forEach(function(a){ a.addEventListener('click', function(){ document.body.classList.remove('menu-open'); }); });
+
+  var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }); }, {threshold:.15});
+  document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('nav a'));
+  var sections = Array.prototype.slice.call(document.querySelectorAll('main section'));
+
+  document.getElementById('form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var f = e.target, note = f.querySelector('.form-note');
+    if(!f.nome.value.trim() || !/\S+@\S+\.\S+/.test(f.email.value) || !f.msg.value.trim()){ note.textContent = 'Preencha nome, e-mail válido e mensagem.'; return; }
+    note.textContent = 'Formulário de demonstração: o envio será ligado ao e-mail do Centro na publicação final.';
+  });
+
+  function hideCurtain(){ document.getElementById('curtain').classList.add('gone'); }
+
+  /* ---------- 3D ---------- */
+  if(!window.THREE || !(function(){ try{ var c=document.createElement('canvas'); return !!(c.getContext('webgl')||c.getContext('experimental-webgl')); }catch(e){ return false; } })()){
+    document.getElementById('fallback').style.display='block'; hideCurtain(); setupScrollOnly(); return;
+  }
+
+  var stage = document.getElementById('stage');
+  var renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+  renderer.setClearColor(0x000000, 0);
+  stage.appendChild(renderer.domElement);
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+  camera.position.set(0, 0, 9);
+  var camTarget = new THREE.Vector3();
+
+  var S = 3.3/640;                       // pixels -> world units
+  var H = 3.3, W = 2.0;                  // group footprint
+  var rig = new THREE.Group(); scene.add(rig);
+  var turn = new THREE.Group(); rig.add(turn);       // holds the four photographic views
+  var spinner = new THREE.Group(); rig.add(spinner); // real rotation (particles live here)
+
+  // front and back share one identical outline, so their rims meet exactly (sealed piece)
+  var META = {"s_front":{"w":418,"h":631,"cx":209,"bottom":617,"top":10},"s_back":{"w":418,"h":631,"cx":209,"bottom":617,"top":10}};
+  var VIEWS = [ {key:'s_front', rot:0}, {key:'s_back', rot:Math.PI} ];
+  var frontH = (META.s_front.bottom - META.s_front.top) * S;
+
+  var loader = new THREE.TextureLoader();
+  var loaded = 0, need = VIEWS.length*2;
+  function tex(src){ var t = loader.load(src, function(){ if(++loaded===need){ hideCurtain(); } }); t.minFilter = THREE.LinearMipmapLinearFilter; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t; }
+  setTimeout(hideCurtain, 5000);
+
+  var shared = {
+    uLight:{value:new THREE.Vector3(-0.5,0.6,1).normalize()},
+    uGold:{value:new THREE.Color(0xC9A86A)}, uReveal:{value:0},
+    uTime:{value:0}, uFlow:{value:0}, uWind:{value:0}, uDepthScale:{value:0.42}
+  };
+  var VERT = [
+    'uniform sampler2D uDepth; uniform float uDepthScale; uniform float uFace;',
+    'uniform float uTime; uniform float uFlow; uniform float uWind;',
+    'varying vec2 vUv; varying vec3 vView; varying vec3 vT; varying vec3 vB; varying vec3 vN;',
+    'void main(){',
+    '  vUv = uv;',
+    '  float d = texture2D(uDepth, uv).r;',
+    '  d *= smoothstep(0.0, 0.05, d);',                       // rim sits exactly on the seam
+    '  vec3 p = position + vec3(0.0, 0.0, d * uDepthScale);',
+    // all motion is computed in one shared (front) space, so both faces move together
+    '  float xs = uFace > 0.0 ? uv.x : 1.0 - uv.x;',
+    '  float h = clamp((uv.y - 0.04) / 0.96, 0.0, 1.0);',
+    '  float bend = h * h;',
+    '  float dx = bend * (sin(uTime * 0.8) * 0.035 + uFlow * 0.20);',
+    '  float dz = bend * (sin(uTime * 0.6 + 1.3) * 0.025 - abs(uFlow) * 0.05);',
+    '  float hem = smoothstep(0.22, 0.02, uv.y);',
+    '  float amp = 0.02 + uWind * 0.10;',
+    '  dz += hem * sin(uTime * 2.4 - xs * 16.0) * amp;',
+    '  dx += hem * cos(uTime * 2.0 - xs * 12.0) * amp * 0.4;',
+    '  float crown = smoothstep(0.86, 1.0, uv.y);',
+    '  dx += crown * (sin(uTime * 1.6) * 0.03 + uFlow * 0.12);',
+    '  p.x += dx * uFace;',      // the back face is turned 180 degrees: its x and z point the other way
+    '  p.z += dz * uFace;',
+    '  vT = normalize(normalMatrix * vec3(1.0,0.0,0.0));',
+    '  vB = normalize(normalMatrix * vec3(0.0,1.0,0.0));',
+    '  vN = normalize(normalMatrix * vec3(0.0,0.0,1.0));',
+    '  vec4 mv = modelViewMatrix * vec4(p,1.0); vView = -mv.xyz;',
+    '  gl_Position = projectionMatrix * mv;',
+    '}'
+  ].join('\n');
+  var FRAG = [
+    'uniform sampler2D uMap; uniform sampler2D uDepth; uniform vec2 uTexel; uniform vec3 uLight; uniform vec3 uGold; uniform float uReveal; uniform float uOpacity; uniform float uGain;',
+    'varying vec2 vUv; varying vec3 vView; varying vec3 vT; varying vec3 vB; varying vec3 vN;',
+    'void main(){',
+    '  vec4 c = texture2D(uMap, vUv);',
+    '  if(c.a < 0.35) discard;',
+    '  c.rgb = min(vec3(1.0), c.rgb * uGain);',
+    '  float dx = texture2D(uDepth, vUv + vec2(uTexel.x, 0.0)).r - texture2D(uDepth, vUv - vec2(uTexel.x, 0.0)).r;',
+    '  float dy = texture2D(uDepth, vUv + vec2(0.0, uTexel.y)).r - texture2D(uDepth, vUv - vec2(0.0, uTexel.y)).r;',
+    '  vec3 nt = normalize(vec3(-dx * 7.0, -dy * 7.0, 1.0));',
+    '  vec3 n = normalize(nt.x * vT + nt.y * vB + nt.z * vN);',
+    '  vec3 L = normalize(uLight);',
+    '  float lam = max(dot(n, L), 0.0);',
+    '  vec3 V = normalize(vView);',
+    '  float isGold = smoothstep(0.10, 0.22, c.r - c.b);',
+    '  float spec = pow(max(dot(reflect(-L, n), V), 0.0), mix(24.0, 48.0, isGold)) * mix(0.10, 0.55, isGold);',
+    '  float rim = pow(1.0 - max(dot(n, V), 0.0), 3.0);',
+    '  vec3 col = c.rgb * (0.74 + 0.36 * lam) + spec * mix(vec3(1.0), uGold * 1.3, isGold);',
+    '  col = mix(col, col * uGold * 1.25, rim * 0.20);',
+    '  float a = smoothstep(0.45, 0.6, c.a) * uReveal * uOpacity;',
+    '  if(a < 0.003) discard;',
+    '  gl_FragColor = vec4(col, a);',
+    '}'
+  ].join('\n');
+
+  var isSmall = window.innerWidth < 860;
+  VIEWS.forEach(function(v){
+    var m = META[v.key];
+    var sc = frontH / ((m.bottom - m.top) * S);            // match statue heights
+    var u = {}; for(var k in shared) u[k] = shared[k];
+    u.uMap = {value: tex(v.key + '.webp')};
+    u.uDepth = {value: tex(v.key + '_d.png')};
+    u.uTexel = {value: new THREE.Vector2(1.5/m.w, 1.5/m.h)};
+    u.uOpacity = {value: 1};
+    u.uGain = {value: 1.0};
+    u.uFace = {value: v.rot === 0 ? 1 : -1};
+    var mat = new THREE.ShaderMaterial({uniforms:u, vertexShader:VERT, fragmentShader:FRAG, transparent:true, depthWrite:true, side:THREE.FrontSide});
+    var geo = new THREE.PlaneGeometry(m.w*S*sc, m.h*S*sc, isSmall?140:220, isSmall?230:380);
+    var mesh = new THREE.Mesh(geo, mat);
+    mesh.position.x = (m.w/2 - m.cx) * S * sc;
+    mesh.position.y = -H/2 - (m.h - m.bottom)*S*sc + m.h*S*sc/2;
+    var face = new THREE.Group(); face.rotation.y = v.rot; face.add(mesh);
+    spinner.add(face);
+    v.mesh = mesh; v.mat = mat;
+  });
+  function updateViews(){}
+
+  // contact shadow (stays on the floor, does not spin)
+  (function(){
+    var cv = document.createElement('canvas'); cv.width = cv.height = 256;
+    var g = cv.getContext('2d'); var gr = g.createRadialGradient(128,128,0,128,128,128);
+    gr.addColorStop(0,'rgba(60,50,35,.30)'); gr.addColorStop(.5,'rgba(60,50,35,.11)'); gr.addColorStop(1,'rgba(60,50,35,0)');
+    g.fillStyle = gr; g.fillRect(0,0,256,256);
+    var sh = new THREE.Mesh(new THREE.PlaneGeometry(W*1.5, W*0.9), new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv), transparent:true, depthWrite:false}));
+    sh.rotation.x = -Math.PI/2; sh.position.set(0, -H/2 + 0.01, 0);
+    rig.add(sh);
+  })();
+
+  // golden halo rings (face the viewer; tilt like a gyroscope when scrolling fast)
+  var haloGroup = new THREE.Group(); haloGroup.position.set(0, 0.55, -0.8); rig.add(haloGroup);
+  var goldMat = function(op){ return new THREE.MeshBasicMaterial({color:0xB8955A, transparent:true, opacity:op, depthWrite:false, side:THREE.DoubleSide}); };
+  var ringA = new THREE.Mesh(new THREE.RingGeometry(1.52, 1.526, 160, 1), goldMat(.55)); haloGroup.add(ringA);
+  var ringB = new THREE.Group(), mB = goldMat(.35);
+  for(var i=0;i<72;i++){ ringB.add(new THREE.Mesh(new THREE.RingGeometry(1.68, 1.692, 3, 1, i*Math.PI*2/72, Math.PI*2/72*0.35), mB)); }
+  haloGroup.add(ringB);
+  var ringC = new THREE.Mesh(new THREE.RingGeometry(2.2, 2.204, 160, 1), goldMat(.18)); haloGroup.add(ringC);
+  var ringD = new THREE.Mesh(new THREE.RingGeometry(1.92, 1.923, 160, 1, 0, Math.PI*0.6), goldMat(.4)); haloGroup.add(ringD);
+
+  // flute motes
+  var N = 150;
+  var pGeo = new THREE.BufferGeometry();
+  var pos = new Float32Array(N*3), seed = new Float32Array(N);
+  for(var j=0;j<N;j++){ seed[j] = Math.random(); }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  pGeo.setAttribute('aSeed', new THREE.BufferAttribute(seed,1));
+  var pMat = new THREE.ShaderMaterial({
+    transparent:true, depthWrite:false,
+    uniforms:{ uTime:{value:0}, uPx:{value:renderer.getPixelRatio()}, uAlpha:{value:0}, uSpread:{value:1} },
+    vertexShader:[
+      'attribute float aSeed; uniform float uTime; uniform float uPx; uniform float uSpread; varying float vLife;',
+      'void main(){',
+      '  float t = fract(uTime * (0.05 + aSeed*0.05) + aSeed);',
+      '  vLife = t;',
+      '  float sx = mix(-0.95, -0.30, fract(aSeed*7.13));',
+      '  vec3 p = vec3(sx, 0.80, 0.35);',
+      '  p.x += (-t * (0.6 + aSeed*0.9) + sin(t*6.2831 + aSeed*20.0)*0.14) * uSpread;',
+      '  p.y += t * (0.9 + fract(aSeed*3.7)*1.3) * uSpread;',
+      '  p.z += sin(aSeed*40.0 + t*3.0) * 0.35 * uSpread;',
+      '  vec4 mv = modelViewMatrix * vec4(p,1.0);',
+      '  gl_PointSize = (2.0 + fract(aSeed*11.0)*4.5) * uPx * (9.0 / -mv.z);',
+      '  gl_Position = projectionMatrix * mv;',
+      '}'
+    ].join('\n'),
+    fragmentShader:[
+      'uniform float uAlpha; varying float vLife;',
+      'void main(){',
+      '  float d = length(gl_PointCoord - 0.5);',
+      '  float a = smoothstep(0.5, 0.0, d) * smoothstep(0.0, 0.15, vLife) * (1.0 - smoothstep(0.6, 1.0, vLife));',
+      '  gl_FragColor = vec4(0.72, 0.56, 0.30, a * 0.85 * uAlpha);',
+      '}'
+    ].join('\n')
+  });
+  var motes = new THREE.Points(pGeo, pMat); motes.frustumCulled = false;
+  spinner.add(motes);
+
+  /* ---------- choreography ----------
+     x: fraction of visible half-width   y: world offset   s: scale (dolly)
+     r: statue turn (radians, cumulative — full turns happen between sections)
+     yaw/pitch/roll: camera orbit around the statue   halo/motes: intensities */
+  var TAU = Math.PI*2;
+  var POSES = {
+    hero:  {x: 0.00, y:-0.10, s:1.02, r: 0.00,        yaw: 0.00, pitch: 0.00, roll: 0.00, halo:1,   motes:1},
+    left:  {x: 0.42, y:-0.05, s:0.98, r:-TAU-0.40,    yaw:-0.30, pitch: 0.10, roll:-0.04, halo:0.4, motes:0.6},
+    right: {x:-0.42, y:-0.05, s:0.98, r:-TAU-Math.PI+0.35,    yaw: 0.32, pitch:-0.08, roll: 0.05, halo:0.4, motes:0.6},
+    close: {x: 0.30, y:-1.25, s:1.85, r:-TAU*2-0.25,    yaw:-0.15, pitch: 0.22, roll:-0.03, halo:0.0, motes:1},
+    verse: {x: 0.44, y:-0.05, s:0.92, r:-TAU*2-Math.PI+0.25,  yaw: 0.10, pitch:-0.12, roll: 0.03, halo:1,   motes:1},
+    right2:{x:-0.40, y:-0.05, s:0.98, r:-TAU*3+0.40,  yaw: 0.35, pitch: 0.06, roll: 0.05, halo:0.4, motes:0.6},
+    end:   {x: 0.48, y:-0.08, s:0.94, r:-TAU*4-0.30,  yaw:-0.25, pitch:-0.05, roll:-0.03, halo:0.7, motes:0.8}
+  };
+  var MOBILE_POSES = {
+    hero:  {x:0, y: 0.55, s:0.78, r: 0.00,       yaw: 0.00, pitch: 0.00, roll: 0.00, halo:1,  motes:1},
+    left:  {x:0, y: 0.45, s:0.82, r:-TAU-0.35,   yaw:-0.20, pitch: 0.08, roll:-0.04, halo:.35, motes:.6},
+    right: {x:0, y: 0.45, s:0.82, r:-TAU-Math.PI+0.30,   yaw: 0.22, pitch:-0.06, roll: 0.05, halo:.35, motes:.6},
+    close: {x:0, y:-0.35, s:1.45, r:-TAU*2-0.15,   yaw:-0.10, pitch: 0.18, roll:-0.03, halo:0,   motes:1},
+    verse: {x:0, y: 0.45, s:0.82, r:-TAU*2-Math.PI+0.2,      yaw: 0.08, pitch:-0.10, roll: 0.03, halo:1,   motes:1},
+    right2:{x:0, y: 0.45, s:0.82, r:-TAU*3+0.35, yaw: 0.25, pitch: 0.05, roll: 0.05, halo:.35, motes:.6},
+    end:   {x:0, y: 0.45, s:0.82, r:-TAU*4-0.25, yaw:-0.18, pitch:-0.05, roll:-0.03, halo:.6,  motes:.8}
+  };
+
+  var anchors = [];
+  function measure(){
+    anchors = sections.map(function(s){ return {y: s.offsetTop + s.offsetHeight/2 - window.innerHeight/2, pose: s.dataset.pose}; });
+  }
+  function ease(t){ return t<.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
+  function poseAt(scrollY){
+    var P = isSmall ? MOBILE_POSES : POSES, o = {}, k;
+    if(scrollY <= anchors[0].y){ for(k in P[anchors[0].pose]) o[k] = P[anchors[0].pose][k]; o.lift = 0; return o; }
+    for(var i=0;i<anchors.length-1;i++){
+      var a = anchors[i], b = anchors[i+1];
+      if(scrollY <= b.y){
+        var raw = Math.min(1, Math.max(0, (scrollY - a.y)/(b.y - a.y)));
+        var t = ease(raw), A = P[a.pose], B = P[b.pose];
+        for(k in A) o[k] = A[k] + (B[k]-A[k])*t;
+        // the statue's turn follows the scroll more directly (feels grabbed by the wheel)
+        o.r = A.r + (B.r - A.r) * (0.35*raw + 0.65*t);
+        // a gentle arc: rises and pushes toward the camera mid-transition
+        o.lift = Math.sin(raw*Math.PI);
+        return o;
+      }
+    }
+    var L = P[anchors[anchors.length-1].pose]; for(k in L) o[k] = L[k]; o.lift = 0; return o;
+  }
+
+  var cur = null;
+  var mouse = {x:0,y:0}, mouseS = {x:0,y:0};
+  window.addEventListener('pointermove', function(e){
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = (e.clientY / window.innerHeight) * 2 - 1;
+  }, {passive:true});
+
+  // drag to spin (mouse); touch keeps scrolling
+  var drag = null, dragRot = 0, dragVel = 0;
+  window.addEventListener('pointerdown', function(e){
+    if(e.target.closest('a,button,input,textarea,label,nav')) return;
+    if(e.pointerType !== 'mouse') return;
+    drag = {x:e.clientX}; document.body.style.cursor = 'grabbing';
+  });
+  window.addEventListener('pointerup', function(){ drag = null; document.body.style.cursor = ''; });
+  window.addEventListener('pointermove', function(e){
+    if(!drag) return; var dx = e.clientX - drag.x; drag.x = e.clientX;
+    dragVel = dx * 0.008; dragRot += dragVel;
+  });
+
+  function resize(){
+    var w = window.innerWidth, h = window.innerHeight;
+    isSmall = w < 860;
+    renderer.setSize(w, h, false);
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+    measure();
+  }
+  window.addEventListener('resize', resize);
+  window.addEventListener('load', measure);
+  resize();
+
+  function onScroll(){
+    header.classList.toggle('scrolled', window.scrollY > 40);
+    var mid = window.scrollY + window.innerHeight*0.45, idx = 0;
+    sections.forEach(function(s,i){ if(s.offsetTop <= mid) idx = i; });
+    var id = sections[idx].id;
+    navLinks.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href') === '#'+id); });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+  var tLoaded = -1;
+  var clock = new THREE.Clock(), reveal = 0, lastY = window.scrollY, vel = 0, velS = 0, spinKick = 0, wind = 0;
+  function frame(){
+    var t = clock.getElapsedTime();
+    var y = window.scrollY;
+    // scroll velocity (px per frame), smoothed
+    vel = y - lastY; lastY = y;
+    velS += (vel - velS) * 0.12;
+    var v = Math.max(-1, Math.min(1, velS / 60));          // -1..1
+    var target = poseAt(y);
+    if(!cur){ cur = {}; for(var kk in target) cur[kk] = target[kk]; }
+    var k = reduce ? 1 : 0.085;
+    for(var key in target){ if(cur[key] === undefined) cur[key] = target[key]; cur[key] += (target[key] - cur[key]) * k; }
+
+    // extra spin impulse from fast scrolling, decays to rest
+    if(!reduce){ spinKick += v * 0.05; }
+    spinKick *= 0.93;
+    wind += (Math.abs(v) - wind) * 0.06;
+
+    var visH = 2 * 9 * Math.tan(THREE.MathUtils.degToRad(15));
+    var visW = visH * camera.aspect;
+    var mobileFit = isSmall ? Math.min(1, visW/(W*1.15)) : 1;
+    var lift = cur.lift || 0;
+
+    rig.position.set(0, cur.y + lift*0.18, lift*0.9);
+    rig.scale.setScalar(cur.s * mobileFit);
+    // tilt the whole stage like a camera dipping with the scroll
+    rig.rotation.x = cur.pitch*0.35 + v*0.10;
+    rig.rotation.z = cur.roll + v*0.05;
+
+    mouseS.x += (mouse.x - mouseS.x) * 0.05; mouseS.y += (mouse.y - mouseS.y) * 0.05;
+    if(!drag){ dragRot *= 0.95; }
+    var idle = reduce ? 0 : 1;
+    spinner.rotation.y = cur.r + spinKick + idle*(Math.sin(t*0.35)*0.08 + mouseS.x*0.3) + dragRot;
+    spinner.rotation.x = idle*(mouseS.y*0.06 + Math.sin(t*0.5)*0.015);
+    spinner.position.y = idle*Math.sin(t*0.8)*0.03;
+
+    // camera orbit: yaw/pitch around the statue, pulling back slightly when the scroll is fast
+    var dist = 9 + Math.abs(v)*1.2 - lift*0.4;
+    var yaw = cur.yaw + idle*mouseS.x*0.08 + v*0.12, pitch = cur.pitch + idle*mouseS.y*0.05;
+    camTarget.set(0, rig.position.y*0.6, 0);
+    camera.position.set(
+      camTarget.x + Math.sin(yaw)*Math.cos(pitch)*dist,
+      camTarget.y + Math.sin(pitch)*dist,
+      Math.cos(yaw)*Math.cos(pitch)*dist
+    );
+    camera.up.set(Math.sin(cur.roll*0.6 + v*0.04), 1, 0).normalize();
+    camera.lookAt(camTarget);
+    // shift the frame so the statue keeps its layout slot while the camera orbits
+    camera.setViewOffset(window.innerWidth, window.innerHeight, -cur.x*window.innerWidth/2, 0, window.innerWidth, window.innerHeight);
+    var fov = 30 + Math.abs(v)*4 + lift*1.5;
+    if(Math.abs(camera.fov - fov) > 0.01){ camera.fov = fov; camera.updateProjectionMatrix(); }
+
+    // light orbits with mouse and turn, so the marble sheen travels across the body
+    updateViews(spinner.rotation.y);
+    shared.uLight.value.set(-0.55 + mouseS.x*0.6 + Math.sin(t*0.3)*0.2, 0.65 - mouseS.y*0.3, 1.0).normalize();
+    shared.uTime.value = reduce ? 0 : t;
+    shared.uFlow.value = reduce ? 0 : v;
+    shared.uWind.value = reduce ? 0 : Math.min(1, wind*2.2 + lift*0.5);
+
+    if(loaded>=need && tLoaded<0) tLoaded = t;
+    reveal = tLoaded<0 ? 0 : Math.min(1, (t - tLoaded)/1.6); reveal = reveal*reveal*(3-2*reveal); shared.uReveal.value = reveal;
+
+    haloGroup.rotation.z = t * 0.04;
+    haloGroup.rotation.x = v * 0.9;
+    haloGroup.rotation.y = -v * 0.6;
+    ringB.rotation.z = -t * 0.09 - v*0.8;
+    ringD.rotation.z = t * 0.25 + spinKick*2;
+    haloGroup.scale.setScalar(1 + Math.sin(t*0.6)*0.012 + lift*0.06);
+    ringA.material.opacity = 0.55 * cur.halo * reveal;
+    mB.opacity = 0.35 * cur.halo * reveal;
+    ringC.material.opacity = 0.18 * cur.halo * reveal;
+    ringD.material.opacity = 0.40 * Math.max(cur.halo, Math.abs(v)) * reveal;
+
+    pMat.uniforms.uTime.value = reduce ? 0 : t*(1 + wind*2);
+    pMat.uniforms.uSpread.value = 1 + wind*0.8;
+    pMat.uniforms.uAlpha.value = Math.max(cur.motes, wind) * reveal * (reduce?0:1);
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  function setupScrollOnly(){
+    window.addEventListener('scroll', function(){ header.classList.toggle('scrolled', window.scrollY > 40); }, {passive:true});
+  }
+})();
+</script>
+</body>
+</html>
