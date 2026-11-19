@@ -135,7 +135,7 @@
   .meet li{display:flex;justify-content:space-between;gap:20px;align-items:baseline;padding:22px 0;border-bottom:1px solid var(--line)}
   .meet h3{font-size:24px;margin-bottom:4px}
   .meet p{font-size:14.5px}
-  .meet .t{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);white-space:nowrap;font-weight:500}
+  .meet .t{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);white-space:nowrap;font-weight:600}
 
   /* Contact */
   form{display:grid;gap:14px;margin-top:8px}
@@ -297,7 +297,7 @@
         <p class="reveal d1" style="margin-bottom:30px">O conhecimento védico é transmitido de mestre a discípulo. Nosso estudo se apoia nessa sucessão.</p>
         <ol class="lineage">
           <li class="reveal d1"><div class="when">Século XVI · Bengala</div><h3>Śrī Caitanya Mahāprabhu</h3><p>Inaugura o movimento de canto congregacional dos santos nomes.</p></li>
-          <li class="reveal d1"><div class="when">Século XIX · Bengala</div><h3>Śrīla Bhaktivinoda Ṭhākura</h3><p>Revive o movimento de Śrī Caitanya e, em 1896, envia ao Ocidente seu livro sobre a vida e os ensinamentos de Caitanya, que chega à Universidade McGill, no Canadá. Abre o caminho que Śrīla Prabhupāda levaria adiante.</p></li>
+          <li class="reveal d1"><div class="when">Século XIX · Bengala</div><h3>Śrīla Bhaktivinoda Ṭhākura</h3><p>Revive o movimento de Śrī Caitanya e abre o caminho que Śrīla Prabhupāda levaria adiante.</p></li>
           <li class="reveal d2"><div class="when">1966 · Nova York</div><h3>Śrīla Prabhupāda</h3><p>A.C. Bhaktivedanta Swami, fundador-ācārya da ISKCON, leva a tradição ao Ocidente.</p></li>
           <li class="reveal d3"><div class="when">2013 · Krishna West</div><h3>H.D. Goswami Ācāryadeva</h3><p>Discípulo de Prabhupāda e PhD em sânscrito por Harvard. Funda o Krishna West para apresentar o bhakti à cultura ocidental.</p></li>
         </ol>
@@ -323,8 +323,9 @@
         <div class="eyebrow reveal">Encontros</div>
         <h2 class="reveal d1">Venha <em>conhecer</em></h2>
         <ul class="meet">
-          <li class="reveal d1"><div><h3>Roda de estudo</h3><p>Leitura comentada da Bhagavad-gītā, aberta a iniciantes.</p></div><span class="t tbd">Dia a definir</span></li>
-          <li class="reveal d2"><div><h3>Kīrtana &amp; meditação</h3><p>Música devocional e meditação com mantras.</p></div><span class="t tbd">Dia a definir</span></li>
+          <li class="reveal d1"><div><h3>Śrīmad-Bhāgavatam</h3><p>Aula diária, online e presencial.</p></div><span class="t">Todos os dias · 6h</span></li>
+          <li class="reveal d1"><div><h3>Bhagavad-gītā</h3><p>Aula diária, online e presencial.</p></div><span class="t">Todos os dias · 20h</span></li>
+          <li class="reveal d2"><div><h3>Kīrtana &amp; meditação</h3><p>Música devocional e meditação com mantras.</p></div><span class="t">Domingo · 7h</span></li>
           <li class="reveal d3"><div><h3>Jantar vegetariano</h3><p>Comida oferecida, conversa e comunidade.</p></div><span class="t tbd">Dia a definir</span></li>
         </ul>
       </div>
@@ -441,13 +442,20 @@
   setTimeout(hideCurtain, 9000);
   var loadNote = document.getElementById('curtain');
 
-  // the model ships as base64 inside a JSON file (the host serves .json, not .glb)
+  // loads radha-krishna.glb; if the host can't serve .glb, falls back to the same model as base64 in radha-krishna.json
   function loadModel(onLoad, onError){
-    fetch('radha-krishna.json').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(function(j){
-      var s = atob(j.glb), n = s.length, bytes = new Uint8Array(n);
-      for(var i=0;i<n;i++) bytes[i] = s.charCodeAt(i);
-      new THREE.GLTFLoader().parse(bytes.buffer, '', onLoad, onError);
-    }).catch(onError);
+    function fromJson(){
+      fetch('radha-krishna.json').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(function(j){
+        var s = atob(j.glb), n = s.length, bytes = new Uint8Array(n);
+        for(var i=0;i<n;i++) bytes[i] = s.charCodeAt(i);
+        new THREE.GLTFLoader().parse(bytes.buffer, '', onLoad, onError);
+      }).catch(onError);
+    }
+    fetch('radha-krishna.glb').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.arrayBuffer(); }).then(function(buf){
+      var head = new Uint8Array(buf, 0, 4);                       // a real .glb starts with "glTF"
+      if(String.fromCharCode(head[0],head[1],head[2],head[3]) !== 'glTF') throw new Error('not glb');
+      new THREE.GLTFLoader().parse(buf, '', onLoad, function(){ fromJson(); });
+    }).catch(fromJson);
   }
   loadModel(function(gltf){
     var src = null; gltf.scene.traverse(function(o){ if(o.isMesh && !src) src = o; });
