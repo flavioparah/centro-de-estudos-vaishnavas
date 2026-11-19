@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CEV · Rādhā-Krishna (frente e costas)</title>
+<title>Centro de Estudos Vaishnavas · Rādhā-Krishna 3D</title>
 <meta name="description" content="Centro de Estudos Vaishnavas — bhakti-yoga, filosofia e comunidade, alinhado à ISKCON e ao Krishna West.">
 <!-- Ícones (selo Krishna West) -->
 <link rel="icon" href="favicon.ico" sizes="any">
@@ -149,11 +149,15 @@
   .info b{display:block;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);font-weight:600;margin-bottom:4px}
   .tbd{border-bottom:1px dashed var(--gold-2)}
 
-  footer{position:relative;z-index:2;border-top:1px solid var(--line);background:var(--bg);padding:44px clamp(20px,6vw,96px)}
+  footer{position:relative;z-index:2;border-top:1px solid var(--line);background:var(--bg);padding:22px clamp(20px,6vw,96px)}
   footer .wrap{justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
   footer p{font-size:13px}
-  .seals{display:flex;gap:22px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .seals{display:flex;flex-wrap:wrap;align-items:center;gap:8px 22px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
   .seals span{display:flex;align-items:center;gap:8px}
+  .seals .credit{display:inline-block;font-size:10px;letter-spacing:.04em;text-transform:none;color:var(--soft)}
+  .seals .credit::before{display:none}
+  .credit a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line)}
+  .credit a:hover{color:var(--gold)}
   .seals span::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--gold)}
 
   /* Reveal */
@@ -343,11 +347,13 @@
 <footer>
   <div class="wrap">
     <p>© <span id="yr"></span> Centro de Estudos Vaishnavas</p>
-    <div class="seals"><span>ISKCON</span><span>Krishna West</span></div>
+    <div class="seals"><span>ISKCON</span><span>Krishna West</span><span class="credit">Modelo 3D: <a href="https://sketchfab.com/rajeevkhare1234567890" target="_blank" rel="noopener">rajeevkhare</a></span></div>
   </div>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
 <script>
 (function(){
   document.getElementById('yr').textContent = new Date().getFullYear();
@@ -390,103 +396,92 @@
   camera.position.set(0, 0, 9);
   var camTarget = new THREE.Vector3();
 
-  var S = 3.3/640;                       // pixels -> world units
-  var H = 3.3, W = 2.0;                  // group footprint
+  // Real 3D sculpture (glTF): Rādhā and Krishna, ivory marble with a golden flute
+  var H = 3.3, W = 2.0;
   var rig = new THREE.Group(); scene.add(rig);
-  var turn = new THREE.Group(); rig.add(turn);       // holds the four photographic views
-  var spinner = new THREE.Group(); rig.add(spinner); // real rotation (particles live here)
+  var spinner = new THREE.Group(); rig.add(spinner);
 
-  // front and back share one identical outline, so their rims meet exactly (sealed piece)
-  var META = {"s_front":{"w":418,"h":631,"cx":209,"bottom":617,"top":10},"s_back":{"w":418,"h":631,"cx":209,"bottom":617,"top":10}};
-  var VIEWS = [ {key:'s_front', rot:0}, {key:'s_back', rot:Math.PI} ];
-  var frontH = (META.s_front.bottom - META.s_front.top) * S;
+  var MODEL_H = 1.92406;                        // model height (feet at y=0)
+  var K = H / MODEL_H;                          // model -> scene scale
+  var holder = new THREE.Group(); holder.scale.setScalar(K); holder.position.y = -H/2; spinner.add(holder);
+  // flute axis in model space (from the ornamented end towards the lips)
+  var FLUTE_A = new THREE.Vector3(-0.503, 1.482, 0.361), FLUTE_U = new THREE.Vector3(0.637, 0.139, -0.759).normalize(), FLUTE_L = 0.47;
 
-  var loader = new THREE.TextureLoader();
-  var loaded = 0, need = VIEWS.length*2;
-  function tex(src){ var t = loader.load(src, function(){ if(++loaded===need){ hideCurtain(); } }); t.minFilter = THREE.LinearMipmapLinearFilter; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t; }
-  setTimeout(hideCurtain, 5000);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.NoToneMapping;
+  renderer.physicallyCorrectLights = false;
+  var pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
 
-  var shared = {
-    uLight:{value:new THREE.Vector3(-0.5,0.6,1).normalize()},
-    uGold:{value:new THREE.Color(0xC9A86A)}, uReveal:{value:0},
-    uTime:{value:0}, uFlow:{value:0}, uWind:{value:0}, uDepthScale:{value:0.42}
-  };
-  var VERT = [
-    'uniform sampler2D uDepth; uniform float uDepthScale; uniform float uFace;',
-    'uniform float uTime; uniform float uFlow; uniform float uWind;',
-    'varying vec2 vUv; varying vec3 vView; varying vec3 vT; varying vec3 vB; varying vec3 vN;',
-    'void main(){',
-    '  vUv = uv;',
-    '  float d = texture2D(uDepth, uv).r;',
-    '  d *= smoothstep(0.0, 0.05, d);',                       // rim sits exactly on the seam
-    '  vec3 p = position + vec3(0.0, 0.0, d * uDepthScale);',
-    // all motion is computed in one shared (front) space, so both faces move together
-    '  float xs = uFace > 0.0 ? uv.x : 1.0 - uv.x;',
-    '  float h = clamp((uv.y - 0.04) / 0.96, 0.0, 1.0);',
-    '  float bend = h * h;',
-    '  float dx = bend * (sin(uTime * 0.8) * 0.035 + uFlow * 0.20);',
-    '  float dz = bend * (sin(uTime * 0.6 + 1.3) * 0.025 - abs(uFlow) * 0.05);',
-    '  float hem = smoothstep(0.22, 0.02, uv.y);',
-    '  float amp = 0.02 + uWind * 0.10;',
-    '  dz += hem * sin(uTime * 2.4 - xs * 16.0) * amp;',
-    '  dx += hem * cos(uTime * 2.0 - xs * 12.0) * amp * 0.4;',
-    '  float crown = smoothstep(0.86, 1.0, uv.y);',
-    '  dx += crown * (sin(uTime * 1.6) * 0.03 + uFlow * 0.12);',
-    '  p.x += dx * uFace;',      // the back face is turned 180 degrees: its x and z point the other way
-    '  p.z += dz * uFace;',
-    '  vT = normalize(normalMatrix * vec3(1.0,0.0,0.0));',
-    '  vB = normalize(normalMatrix * vec3(0.0,1.0,0.0));',
-    '  vN = normalize(normalMatrix * vec3(0.0,0.0,1.0));',
-    '  vec4 mv = modelViewMatrix * vec4(p,1.0); vView = -mv.xyz;',
-    '  gl_Position = projectionMatrix * mv;',
-    '}'
-  ].join('\n');
-  var FRAG = [
-    'uniform sampler2D uMap; uniform sampler2D uDepth; uniform vec2 uTexel; uniform vec3 uLight; uniform vec3 uGold; uniform float uReveal; uniform float uOpacity; uniform float uGain;',
-    'varying vec2 vUv; varying vec3 vView; varying vec3 vT; varying vec3 vB; varying vec3 vN;',
-    'void main(){',
-    '  vec4 c = texture2D(uMap, vUv);',
-    '  if(c.a < 0.35) discard;',
-    '  c.rgb = min(vec3(1.0), c.rgb * uGain);',
-    '  float dx = texture2D(uDepth, vUv + vec2(uTexel.x, 0.0)).r - texture2D(uDepth, vUv - vec2(uTexel.x, 0.0)).r;',
-    '  float dy = texture2D(uDepth, vUv + vec2(0.0, uTexel.y)).r - texture2D(uDepth, vUv - vec2(0.0, uTexel.y)).r;',
-    '  vec3 nt = normalize(vec3(-dx * 7.0, -dy * 7.0, 1.0));',
-    '  vec3 n = normalize(nt.x * vT + nt.y * vB + nt.z * vN);',
-    '  vec3 L = normalize(uLight);',
-    '  float lam = max(dot(n, L), 0.0);',
-    '  vec3 V = normalize(vView);',
-    '  float isGold = smoothstep(0.10, 0.22, c.r - c.b);',
-    '  float spec = pow(max(dot(reflect(-L, n), V), 0.0), mix(24.0, 48.0, isGold)) * mix(0.10, 0.55, isGold);',
-    '  float rim = pow(1.0 - max(dot(n, V), 0.0), 3.0);',
-    '  vec3 col = c.rgb * (0.74 + 0.36 * lam) + spec * mix(vec3(1.0), uGold * 1.3, isGold);',
-    '  col = mix(col, col * uGold * 1.25, rim * 0.20);',
-    '  float a = smoothstep(0.45, 0.6, c.a) * uReveal * uOpacity;',
-    '  if(a < 0.003) discard;',
-    '  gl_FragColor = vec4(col, a);',
-    '}'
-  ].join('\n');
+  var hemi = new THREE.HemisphereLight(0xfff8ee, 0x8f8270, 0.30); scene.add(hemi);
+  var key = new THREE.DirectionalLight(0xfff0da, 0.85); key.position.set(-3, 4, 5); scene.add(key);
+  var rimL = new THREE.DirectionalLight(0xffe2b0, 0.35); rimL.position.set(4, 2, -4); scene.add(rimL);
 
-  var isSmall = window.innerWidth < 860;
-  VIEWS.forEach(function(v){
-    var m = META[v.key];
-    var sc = frontH / ((m.bottom - m.top) * S);            // match statue heights
-    var u = {}; for(var k in shared) u[k] = shared[k];
-    u.uMap = {value: tex(v.key + '.webp')};
-    u.uDepth = {value: tex(v.key + '_d.png')};
-    u.uTexel = {value: new THREE.Vector2(1.5/m.w, 1.5/m.h)};
-    u.uOpacity = {value: 1};
-    u.uGain = {value: 1.0};
-    u.uFace = {value: v.rot === 0 ? 1 : -1};
-    var mat = new THREE.ShaderMaterial({uniforms:u, vertexShader:VERT, fragmentShader:FRAG, transparent:true, depthWrite:true, side:THREE.FrontSide});
-    var geo = new THREE.PlaneGeometry(m.w*S*sc, m.h*S*sc, isSmall?140:220, isSmall?230:380);
-    var mesh = new THREE.Mesh(geo, mat);
-    mesh.position.x = (m.w/2 - m.cx) * S * sc;
-    mesh.position.y = -H/2 - (m.h - m.bottom)*S*sc + m.h*S*sc/2;
-    var face = new THREE.Group(); face.rotation.y = v.rot; face.add(mesh);
-    spinner.add(face);
-    v.mesh = mesh; v.mat = mat;
+  var marble = new THREE.MeshPhysicalMaterial({color:0xd8d0c2, roughness:0.5, metalness:0.0, clearcoat:0.2, clearcoatRoughness:0.4, envMapIntensity:0.22, transparent:true, opacity:0});
+  var goldM = new THREE.MeshPhysicalMaterial({color:0xd9a548, roughness:0.22, metalness:1.0, clearcoat:0.6, clearcoatRoughness:0.15, envMapIntensity:1.25, transparent:true, opacity:0});
+
+  var loaded = 0, need = 1;
+  setTimeout(hideCurtain, 9000);
+  var loadNote = document.getElementById('curtain');
+
+  // the model ships as base64 inside a JSON file (the host serves .json, not .glb)
+  function loadModel(onLoad, onError){
+    fetch('radha-krishna.json').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(function(j){
+      var s = atob(j.glb), n = s.length, bytes = new Uint8Array(n);
+      for(var i=0;i<n;i++) bytes[i] = s.charCodeAt(i);
+      new THREE.GLTFLoader().parse(bytes.buffer, '', onLoad, onError);
+    }).catch(onError);
+  }
+  loadModel(function(gltf){
+    var src = null; gltf.scene.traverse(function(o){ if(o.isMesh && !src) src = o; });
+    src.updateMatrixWorld(true);
+    var g = src.geometry, pa = g.attributes.position, mtx = src.matrixWorld;
+    // un-quantize into plain floats in model space
+    var n = pa.count, arr = new Float32Array(n*3), vtmp = new THREE.Vector3();
+    var raw = pa.isInterleavedBufferAttribute ? pa.data.array : pa.array, norm = pa.normalized, div = raw instanceof Int16Array ? 32767 : raw instanceof Uint16Array ? 65535 : raw instanceof Int8Array ? 127 : raw instanceof Uint8Array ? 255 : 1;
+    for(var i=0;i<n;i++){
+      var x = pa.getX(i), y = pa.getY(i), z = pa.getZ(i);           // raw stored values (handles interleaved data)
+      if(norm){ x = Math.max(x/div, -1); y = Math.max(y/div, -1); z = Math.max(z/div, -1); }
+      vtmp.set(x,y,z).applyMatrix4(mtx); arr[i*3]=vtmp.x; arr[i*3+1]=vtmp.y; arr[i*3+2]=vtmp.z;
+    }
+    // which vertices belong to the flute
+    var isGold = new Uint8Array(n), d = new THREE.Vector3(), tt, rr;
+    for(i=0;i<n;i++){
+      d.set(arr[i*3]-FLUTE_A.x, arr[i*3+1]-FLUTE_A.y, arr[i*3+2]-FLUTE_A.z);
+      tt = d.dot(FLUTE_U); rr = Math.sqrt(Math.max(0, d.lengthSq() - tt*tt));
+      if(tt > -0.035 && tt < FLUTE_L && rr < (tt < 0.045 ? 0.031 : 0.0215)) isGold[i] = 1;
+    }
+    var idx = g.index.array, body = [], flute = [];
+    for(i=0;i<idx.length;i+=3){
+      var a = idx[i], b = idx[i+1], c = idx[i+2];
+      ((isGold[a] + isGold[b] + isGold[c]) >= 2 ? flute : body).push(a,b,c);
+    }
+    function build(list, mat){
+      var geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+      geo.setIndex(new THREE.BufferAttribute(n > 65535 ? new Uint32Array(list) : new Uint16Array(list), 1));
+      geo.computeVertexNormals();
+      var m = new THREE.Mesh(geo, mat); holder.add(m); return m;
+    }
+    build(body, marble); build(flute, goldM);
+    loaded = 1; hideCurtain();
+  }, function(err){
+    console.error(err);
+    document.getElementById('fallback').style.display = 'block'; hideCurtain();
   });
-  function updateViews(){}
+
+  // kept so the animation loop can stay the same as the photographic versions
+  var shared = { uLight:{value:new THREE.Vector3()}, uTime:{value:0}, uFlow:{value:0}, uWind:{value:0}, uReveal:{value:0} };
+  function updateViews(){
+    var r = shared.uReveal.value;
+    var tr = r < 0.999;
+    if(marble.transparent !== tr){ marble.transparent = goldM.transparent = tr; marble.depthWrite = goldM.depthWrite = true; marble.needsUpdate = goldM.needsUpdate = true; }
+    marble.opacity = tr ? r : 1; goldM.opacity = tr ? r : 1;
+    var L = shared.uLight.value;
+    key.position.set(L.x*6, L.y*6 + 1, 5);
+    var flick = 1 + Math.sin(shared.uTime.value*2.1)*0.04;
+    rimL.intensity = 0.35 * flick + shared.uWind.value*0.2;
+  }
 
   // contact shadow (stays on the floor, does not spin)
   (function(){
@@ -518,17 +513,18 @@
   pGeo.setAttribute('aSeed', new THREE.BufferAttribute(seed,1));
   var pMat = new THREE.ShaderMaterial({
     transparent:true, depthWrite:false,
-    uniforms:{ uTime:{value:0}, uPx:{value:renderer.getPixelRatio()}, uAlpha:{value:0}, uSpread:{value:1} },
+    uniforms:{ uTime:{value:0}, uPx:{value:renderer.getPixelRatio()}, uAlpha:{value:0}, uSpread:{value:1},
+      uA:{value:FLUTE_A.clone().multiplyScalar(K).add(new THREE.Vector3(0,-H/2,0))}, uU:{value:FLUTE_U.clone()}, uLen:{value:FLUTE_L*K} },
     vertexShader:[
-      'attribute float aSeed; uniform float uTime; uniform float uPx; uniform float uSpread; varying float vLife;',
+      'attribute float aSeed; uniform float uTime; uniform float uPx; uniform float uSpread; uniform vec3 uA; uniform vec3 uU; uniform float uLen; varying float vLife;',
       'void main(){',
       '  float t = fract(uTime * (0.05 + aSeed*0.05) + aSeed);',
       '  vLife = t;',
-      '  float sx = mix(-0.95, -0.30, fract(aSeed*7.13));',
-      '  vec3 p = vec3(sx, 0.80, 0.35);',
-      '  p.x += (-t * (0.6 + aSeed*0.9) + sin(t*6.2831 + aSeed*20.0)*0.14) * uSpread;',
-      '  p.y += t * (0.9 + fract(aSeed*3.7)*1.3) * uSpread;',
-      '  p.z += sin(aSeed*40.0 + t*3.0) * 0.35 * uSpread;',
+      '  vec3 p = uA + uU * (fract(aSeed*7.13) * uLen * 0.85);',      // born along the golden flute (its holes)
+      '  vec3 side = normalize(cross(uU, vec3(0.0,1.0,0.0)));',
+      '  p += (-uU * t * (0.35 + aSeed*0.6) + side * sin(t*6.2831 + aSeed*20.0) * 0.16) * uSpread;',
+      '  p.y += t * (0.8 + fract(aSeed*3.7)*1.3) * uSpread;',
+      '  p += side * (fract(aSeed*5.3) - 0.5) * t * 0.6 * uSpread;',
       '  vec4 mv = modelViewMatrix * vec4(p,1.0);',
       '  gl_PointSize = (2.0 + fract(aSeed*11.0)*4.5) * uPx * (9.0 / -mv.z);',
       '  gl_Position = projectionMatrix * mv;',
@@ -556,7 +552,7 @@
     left:  {x: 0.42, y:-0.05, s:0.98, r:-TAU-0.40,    yaw:-0.30, pitch: 0.10, roll:-0.04, halo:0.4, motes:0.6},
     right: {x:-0.42, y:-0.05, s:0.98, r:-TAU-Math.PI+0.35,    yaw: 0.32, pitch:-0.08, roll: 0.05, halo:0.4, motes:0.6},
     close: {x: 0.30, y:-1.25, s:1.85, r:-TAU*2-0.25,    yaw:-0.15, pitch: 0.22, roll:-0.03, halo:0.0, motes:1},
-    verse: {x: 0.44, y:-0.05, s:0.92, r:-TAU*2-Math.PI+0.25,  yaw: 0.10, pitch:-0.12, roll: 0.03, halo:1,   motes:1},
+    verse: {x: 0.44, y:-0.05, s:0.92, r:-TAU*2-0.85,  yaw: 0.10, pitch:-0.12, roll: 0.03, halo:1,   motes:1},
     right2:{x:-0.40, y:-0.05, s:0.98, r:-TAU*3+0.40,  yaw: 0.35, pitch: 0.06, roll: 0.05, halo:0.4, motes:0.6},
     end:   {x: 0.48, y:-0.08, s:0.94, r:-TAU*4-0.30,  yaw:-0.25, pitch:-0.05, roll:-0.03, halo:0.7, motes:0.8}
   };
